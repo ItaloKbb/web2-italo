@@ -1,4 +1,5 @@
 import prisma from "../prisma/client.js";
+import {NotFoundError, AuthorizationError} from "../utils/errors.js";
 
 // Criar um post
 export const createPost = async (data, userId) => {
@@ -45,6 +46,14 @@ export const getPostsByUserId = async (userId) => {
   });
 };
 
+// Obter posts por ID
+export const getPostsById = async (id) => {
+  return await prisma.post.findMany({
+    where: { id },
+    include: { user: true, comments: true },
+  });
+};
+
 // Atualizar um post com verificação de propriedade
 export const updatePost = async (id, userId, data) => {
   // Verifica se o post pertence ao usuário logado
@@ -53,11 +62,11 @@ export const updatePost = async (id, userId, data) => {
   });
 
   if (!post) {
-    throw new Error("Post não encontrado");
+    throw new NotFoundError("Post não encontrado");
   }
 
   if (post.userId !== userId) {
-    throw new Error("Você não tem permissão para atualizar este post");
+    throw new AuthorizationError("Você não tem permissão para atualizar este post");
   }
 
   // Atualiza o post
@@ -75,11 +84,11 @@ export const deletePost = async (id, userId) => {
   });
 
   if (!post) {
-    throw new Error("Post não encontrado");
+    throw new NotFoundError("Post não encontrado");
   }
 
   if (post.userId !== userId) {
-    throw new Error("Você não tem permissão para deletar este post");
+    throw new AuthorizationError("Você não tem permissão para deletar este post");
   }
 
   // Deleta o post

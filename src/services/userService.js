@@ -1,4 +1,5 @@
 import prisma from "../prisma/client.js";
+import {NotFoundError, AuthorizationError} from "../utils/errors.js";
 
 // Criar um usuário
 export const createUser = async (data) => {
@@ -18,11 +19,11 @@ export const updateUser = async (id, data, userId) => {
     });
   
     if (!user) {
-      throw new Error("Usuario não encontrado");
+      throw new NotFoundError("Usuario não encontrado");
     }
   
     if (id !== userId) {
-      throw new Error("Você não tem permissão para editar esse usuario");
+      throw new AuthorizationError("Você não tem permissão para editar esse usuario");
     }
   
   return await prisma.user.update({
@@ -39,11 +40,11 @@ export const deleteUser = async (id, userId) => {
   });
 
   if (!user) {
-    throw new Error("User não encontrado");
+    throw new NotFoundError("Usuario não encontrado");
   }
 
   if (id !== userId) {
-    throw new Error("Você não tem permissão para deletar este post");
+    throw new AuthorizationError("Você não tem permissão para deletar este usuario");
   }
 
   return await prisma.user.delete({ where: { id } });
